@@ -1,0 +1,30 @@
+# Fish Weight Prediction & Biometric Segmentation Project
+## Complete Project Narrative for NotebookLM
+
+### 1. Data Collection & Preprocessing
+The foundation of the project began with high-quality data extraction. We recorded synchronized Top-View and Front-View videos of various fishes in a controlled tank environment. To ensure the highest quality training data, we manually reviewed the footage and extracted the absolute best, clearest 30-second synchronized segments for each fish. These premium frames were compiled into a master directory (`final stages all frames`) to serve as the ground-truth visual dataset. 
+
+### 2. Annotation Pipeline (CVAT.ai)
+To train an accurate object detection model, the extracted frames needed to be meticulously annotated. We utilized **CVAT.ai** (Computer Vision Annotation Tool) to manually draw precise bounding boxes around the fish in both the top and front camera angles. Once the annotation process was complete, the data was exported and downloaded in the industry-standard **MOT 1.1** (Multiple Object Tracking) dataset format.
+
+### 3. YOLO Model Training & Architecture 
+The MOT 1.1 annotations were systematically converted into the required YOLO format. To ensure we had the most robust detection capabilities, we trained three different state-of-the-art YOLO architectures on our dataset:
+*   **YOLOv8m** (Medium)
+*   **YOLOv11m** (Medium)
+*   **YOLOv12m** (Medium)
+
+### 4. Model Evaluation & Selection
+To objectively select the best model, we conducted rigorous inference testing on entirely *unseen* data (fish videos that were not included in the training set). We compared the models based on Detection Rate and Average Confidence scores.
+**Results:**
+*   **YOLOv8m:** 100.0% Detection Rate, 0.8010 Avg Confidence
+*   **YOLOv12m:** 100.0% Detection Rate, 0.8151 Avg Confidence
+**Conclusion:** **YOLO12m** was selected as our primary champion model because it maintained a perfect detection rate while providing the highest average confidence scores on unseen data.
+
+### 5. Complex Scenario Generalization (Multi-Fish Combinations)
+To truly validate the YOLO12m model, we tested it against a highly complex scenario: a combination video where multiple fish, specifically **Fish 3 and Fish 4**, were swimming together in the same tank. The model performed exceptionally well. It successfully tracked both fish independently, differentiated their boundaries, and maintained tight bounding boxes around multiple distinct targets simultaneously without confusing their identities.
+
+### 6. Full SAM Integration & Biometric Weight Estimation
+With YOLO12m providing perfect bounding boxes on the Fish 3 and Fish 4 combination footage, we passed those coordinates into **Meta's Full Segment Anything Model (SAM ViT-B)**. 
+*   **Segmentation:** SAM generated pixel-perfect silhouettes of Fish 3 and Fish 4. We applied Morphological Opening algorithms to gently remove the fins, leaving only the core body mass.
+*   **Dimensional Measurement:** We mathematically converted the pixel masks into real-world Centimeters (cm) using camera calibration arrays. This allowed us to extract the precise **Length**, **Breadth (Width)**, and **Height** of both fishes from the top and front camera angles.
+*   **Weight Prediction:** Finally, we fed these exact Length, Breadth, and Height measurements into our trained **Ridge Regression** machine learning model. The pipeline successfully performed dynamic weight estimation for the combination fishes (Fish 3 and Fish 4) simultaneously in the live video feed by averaging the estimations across multiple frames.

@@ -1,0 +1,5 @@
+source_csv=fish_frames_200_filtered_200_per_fish.csv
+total_rows=3000
+ok=846
+skipped=2154
+fail=0

@@ -1,0 +1,5 @@
+source_csv=fish_frames_200_clean_unique_no_repeat.csv
+total_rows=3000
+ok=3000
+skipped=0
+fail=0

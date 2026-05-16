@@ -1,0 +1,71 @@
+================================================================================
+PRODUCTION DATASET REPORT — fish_frames_200_clean_unique_no_repeat.csv
+================================================================================
+
+Source:              fish_frame_measurements_enhanced.csv
+Source rows (single): 2344
+Output rows:         410
+Unique fish:         12
+Target per fish:     200 (actual varies)
+Frames per fish:     min=10, max=141, avg=34
+CV threshold:        15.0%
+Repetition:          NONE (every row is a unique frame)
+
+Pipeline stages:
+  0. Weight allometric prior   — length bounds from fish weight
+  1. Physical plausibility     — geometry + mask + blur gates
+  2. Optimal band selection    — widest band achieving CV < 15%
+  3. MAD z-score polish        — z: 3.0 → 2.5 → 2.0
+  4. Cross-metric consistency  — max z ≤ 2.5
+  5. Temporal-diversity sample  — up to 200 unique frames
+
+--------------------------------------------------------------------------------
+Per-fish pipeline:
+--------------------------------------------------------------------------------
+  fish01    wt= 67.5g  raw=   65 → prior=   54 → plaus=   53 → band=   51 → mad=   36 → consist=   36 → sel= 36
+  fish13    wt= 13.9g  raw=  151 → prior=  134 → plaus=   83 → band=   83 → mad=   20 → consist=   20 → sel= 20
+  fish14    wt= 12.3g  raw=   78 → prior=   54 → plaus=   44 → band=   22 → mad=   22 → consist=   22 → sel= 22
+  fish15    wt=  9.6g  raw=   36 → prior=   10 → plaus=   10 → band=   10 → mad=   10 → consist=   10 → sel= 10
+  fish2     wt= 16.0g  raw=  167 → prior=   57 → plaus=   56 → band=   46 → mad=   21 → consist=   21 → sel= 21
+  fish3     wt= 81.9g  raw=  137 → prior=   62 → plaus=   58 → band=   33 → mad=   24 → consist=   24 → sel= 24
+  fish4     wt= 61.2g  raw=  138 → prior=   28 → plaus=   19 → band=   19 → mad=   19 → consist=   19 → sel= 19
+  fish5     wt= 27.4g  raw=  107 → prior=   11 → plaus=   10 → band=   10 → mad=   10 → consist=   10 → sel= 10
+  fish6     wt= 13.8g  raw=  511 → prior=  249 → plaus=  228 → band=  186 → mad=  141 → consist=  141 → sel=141
+  fish7     wt= 18.3g  raw=  240 → prior=   23 → plaus=   22 → band=   22 → mad=   22 → consist=   22 → sel= 22
+  fish8     wt= 12.7g  raw=  351 → prior=  197 → plaus=  182 → band=   85 → mad=   64 → consist=   64 → sel= 64
+  fish9     wt= 14.0g  raw=   96 → prior=   40 → plaus=   36 → band=   21 → mad=   21 → consist=   21 → sel= 21
+
+--------------------------------------------------------------------------------
+Quality — CV% and medians per fish:
+--------------------------------------------------------------------------------
+  fish01    sel= 36  CV: L=  6.5%  W=  8.8%  H= 11.7%  med: L=  15.9  W=  8.0  H= 10.4  [PASS]
+  fish13    sel= 20  CV: L=  3.3%  W=  1.5%  H=  6.5%  med: L=   9.7  W=  7.0  H=  5.7  [PASS]
+  fish14    sel= 22  CV: L=  8.8%  W= 10.7%  H= 18.3%  med: L=   7.4  W=  6.0  H=  3.9  [WARN]
+  fish15    sel= 10  CV: L=  5.2%  W=  9.0%  H= 10.1%  med: L=   8.0  W=  4.4  H=  3.5  [PASS]
+  fish2     sel= 21  CV: L=  5.2%  W=  6.3%  H=  6.9%  med: L=  12.1  W=  6.6  H=  6.1  [PASS]
+  fish3     sel= 24  CV: L=  4.9%  W=  6.1%  H=  1.8%  med: L=  19.0  W=  8.2  H= 13.1  [PASS]
+  fish4     sel= 19  CV: L=  8.4%  W= 22.9%  H=  7.4%  med: L=  16.9  W=  7.7  H= 13.9  [FAIL]
+  fish5     sel= 10  CV: L= 24.0%  W= 12.0%  H= 30.4%  med: L=  16.3  W=  9.6  H=  5.7  [FAIL]
+  fish6     sel=141  CV: L=  3.4%  W=  7.8%  H= 10.7%  med: L=   9.8  W=  7.5  H=  6.9  [PASS]
+  fish7     sel= 22  CV: L= 11.1%  W=  5.9%  H=  5.5%  med: L=  11.0  W=  8.7  H=  8.8  [PASS]
+  fish8     sel= 64  CV: L=  7.6%  W=  7.9%  H= 10.2%  med: L=  12.8  W=  4.6  H=  3.6  [PASS]
+  fish9     sel= 21  CV: L= 15.2%  W= 15.8%  H= 14.0%  med: L=   9.8  W=  7.1  H=  2.7  [WARN]
+
+Overall: SOME FISH NEED REVIEW
+
+--------------------------------------------------------------------------------
+Unique FrameIndex per fish:
+--------------------------------------------------------------------------------
+FishID
+fish01     36
+fish13     20
+fish14     22
+fish15     10
+fish2      21
+fish3      24
+fish4      19
+fish5      10
+fish6     141
+fish7      22
+fish8      64
+fish9      21

@@ -100,8 +100,7 @@ def create_stacking_model(base_models, X_train, y_train):
     stacking_model = StackingRegressor(
         estimators=base_models,
         final_estimator=meta_learner,
-        cv=5,
-        random_state=42
+        cv=5
     )
     
     return stacking_model
@@ -204,6 +203,9 @@ def main():
     print("Creating stacking ensemble...")
     base_models = [(name, results[name]['model']) for name in results.keys()]
     stacking_model = create_stacking_model(base_models, X_train, y_train)
+    
+    # Fit the stacking model
+    stacking_model.fit(X_train, y_train)
     
     # Evaluate stacking
     y_pred_stack = stacking_model.predict(X_test)

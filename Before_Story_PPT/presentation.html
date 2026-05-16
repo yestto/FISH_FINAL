@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Before Story – Fish Weight Detection Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e1a;--card:#131829;--accent:#6c63ff;--accent2:#00d4aa;--text:#e8e8f0;--muted:#8888aa;--danger:#ff6b6b;--warn:#ffd93d;--success:#6bcf7f}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;width:100vw}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 80px;opacity:0;transform:translateX(60px);transition:all .5s ease;pointer-events:none}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all}
+.slide-number{position:fixed;bottom:20px;right:30px;font-size:14px;color:var(--muted);z-index:100}
+h1{font-size:2.8em;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;text-align:center}
+h2{font-size:2em;font-weight:700;color:var(--accent);margin-bottom:20px;text-align:center}
+h3{font-size:1.3em;font-weight:600;color:var(--accent2);margin-bottom:10px}
+p,.desc{font-size:1.05em;line-height:1.7;color:var(--muted);max-width:900px;text-align:center}
+.subtitle{font-size:1.15em;color:var(--muted);margin-bottom:30px;text-align:center}
+.badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.8em;font-weight:600;margin:3px}
+.badge-red{background:rgba(255,107,107,.15);color:var(--danger)}
+.badge-green{background:rgba(107,207,127,.15);color:var(--success)}
+.badge-yellow{background:rgba(255,217,61,.15);color:var(--warn)}
+.badge-blue{background:rgba(108,99,255,.15);color:var(--accent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:30px;width:100%;max-width:1100px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;width:100%;max-width:1100px}
+.card{background:var(--card);border-radius:16px;padding:28px;border:1px solid rgba(255,255,255,.06);transition:transform .3s}
+.card:hover{transform:translateY(-4px)}
+.card img{width:100%;border-radius:10px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08)}
+ul{list-style:none;text-align:left;max-width:800px}
+ul li{padding:8px 0;padding-left:28px;position:relative;font-size:1em;color:var(--text)}
+ul li::before{content:'▸';position:absolute;left:0;color:var(--accent)}
+.highlight{color:var(--accent2);font-weight:600}
+.warn{color:var(--danger);font-weight:600}
+table{width:100%;max-width:900px;border-collapse:collapse;margin-top:15px}
+th{background:rgba(108,99,255,.2);padding:12px;text-align:left;font-weight:600;font-size:.9em;border-bottom:2px solid var(--accent)}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.9em}
+tr:hover{background:rgba(255,255,255,.03)}
+.nav{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:100}
+.nav button{padding:10px 24px;border:1px solid rgba(108,99,255,.4);background:rgba(108,99,255,.15);color:var(--text);border-radius:10px;cursor:pointer;font-family:inherit;font-size:.9em;transition:all .2s}
+.nav button:hover{background:var(--accent);border-color:var(--accent)}
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s;z-index:200}
+.metric-box{text-align:center;padding:20px;background:rgba(108,99,255,.08);border-radius:14px;border:1px solid rgba(108,99,255,.15)}
+.metric-box .val{font-size:2em;font-weight:800;color:var(--accent)}
+.metric-box .label{font-size:.85em;color:var(--muted);margin-top:4px}
+.icon{font-size:2.5em;margin-bottom:10px}
+.flow-arrow{font-size:2em;color:var(--accent);align-self:center;text-align:center}
+.tag-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="slide-number" id="slideNum"></div>
+
+<!-- SLIDE 1: Title -->
+<div class="slide active" id="s0">
+  <div style="text-align:center">
+    <div style="font-size:3.5em;margin-bottom:10px">🐟</div>
+    <h1>The Before Story</h1>
+    <p class="subtitle">Fish Weight Detection from Morphometric Dimensions</p>
+    <p style="margin-top:20px;font-size:.95em">Classic CV → SAM → Manual Annotation → YOLO<br>
+    <span style="color:var(--muted);font-size:.85em">A journey through challenges, iterations, and the path to the current approach</span></p>
+    <div class="tag-row" style="margin-top:30px">
+      <span class="badge badge-blue">Computer Vision</span>
+      <span class="badge badge-green">Regression Models</span>
+      <span class="badge badge-yellow">SAM</span>
+      <span class="badge badge-red">YOLO Detection</span>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: Problem Setup -->
+<div class="slide" id="s1">
+  <h2>🎯 Problem Statement & Setup</h2>
+  <p style="margin-bottom:25px">Predict fish weight (g) non-invasively from underwater video using morphometric measurements</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>📷 Data Capture</h3>
+      <ul>
+        <li><span class="highlight">15 individual fish</span> recorded in a controlled tank</li>
+        <li><b>Top view</b> camera → Length, Width, Area, Perimeter</li>
+        <li><b>Front view</b> camera → Height</li>
+        <li>Calibration tapes for pixel-to-cm conversion</li>
+        <li>Weight range: <span class="highlight">9.6 – 81.9 g</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🔬 Pipeline Goal</h3>
+      <ul>
+        <li>Extract fish silhouette (mask) from each frame</li>
+        <li>Compute morphometric features (L, W, H, A, P)</li>
+        <li>Train regression models for weight prediction</li>
+        <li>Achieve publication-ready, peer-reviewable accuracy</li>
+        <li>No data leakage or contaminated features</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: Camera Views -->
+<div class="slide" id="s2">
+  <h2>📸 Camera Setup & The Challenge</h2>
+  <div class="grid3">
+    <div class="card">
+      <img src="top view.jpeg" alt="Top View">
+      <h3 style="color:var(--success)">✅ Top View</h3>
+      <p style="text-align:left;font-size:.9em">Relatively clear. Good for many frames. Fish silhouette often extractable via background subtraction.</p>
+    </div>
+    <div class="card">
+      <img src="front view.jpeg" alt="Front View">
+      <h3 style="color:var(--danger)">❌ Front View</h3>
+      <p style="text-align:left;font-size:.9em">Severely murky & turbid water. Fish nearly invisible. Masking fails for most frames.</p>
+    </div>
+    <div class="card">
+      <img src="second front view.jpeg" alt="Front View 2">
+      <h3 style="color:var(--danger)">❌ Front View 2</h3>
+      <p style="text-align:left;font-size:.9em">Another front view sample showing extreme low visibility — the core challenge of this project.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: Classic CV Approach -->
+<div class="slide" id="s3">
+  <h2>🔧 Method 1: Classic CV Pipeline</h2>
+  <p style="margin-bottom:20px">Background subtraction + motion segmentation with enhancement techniques</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>Pipeline Steps</h3>
+      <ul>
+        <li>Median background modeling (120 sampled frames)</li>
+        <li>Gaussian blur → absolute difference → threshold</li>
+        <li>HSV-based tape exclusion masks</li>
+        <li>Morphological cleaning (Open → Close → Erode/Dilate)</li>
+        <li>Convex hull geometry for measurements</li>
+        <li>Quality filtering (blur score, border margin, aspect ratio)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Enhancement Techniques Applied</h3>
+      <ul>
+        <li><span class="highlight">Auto Gamma Correction</span> — exposure normalization</li>
+        <li><span class="highlight">CLAHE</span> — local contrast (LAB color space)</li>
+        <li><span class="highlight">Multi-Scale Retinex</span> — turbidity/haze removal</li>
+        <li><span class="highlight">Non-Local Means Denoising</span> — noise reduction</li>
+        <li><span class="highlight">Bilateral Filter</span> — edge-preserving smoothing</li>
+        <li><span class="highlight">Unsharp Mask</span> — edge sharpening in haze</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: Classic CV Results -->
+<div class="slide" id="s4">
+  <h2>📊 Classic CV: Mixed Results</h2>
+  <div class="grid2">
+    <div class="card" style="border:1px solid rgba(107,207,127,.3)">
+      <h3 style="color:var(--success)">✅ Top View — Worked Well</h3>
+      <ul>
+        <li>Good mask extraction for <span class="highlight">many frames</span></li>
+        <li>Background subtraction effective from above</li>
+        <li>Clean silhouettes → accurate Length, Width, Area</li>
+        <li>Enhancement (CLAHE + Gamma) improved consistency</li>
+        <li>Up to 200 quality frames per fish extracted</li>
+      </ul>
+    </div>
+    <div class="card" style="border:1px solid rgba(255,107,107,.3)">
+      <h3 style="color:var(--danger)">❌ Front View — Major Failures</h3>
+      <ul>
+        <li><span class="warn">Murky, turbid water</span> made fish nearly invisible</li>
+        <li>Masking failed for <span class="warn">most frames</span></li>
+        <li>Only a <span class="warn">few frames</span> produced usable masks</li>
+        <li>Height (H) measurements were unreliable</li>
+        <li>Even Retinex + Unsharp couldn't rescue visibility</li>
+        <li>This led to need for <span class="warn">manual annotation</span></li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:20px"><span class="badge badge-red">Key Insight</span> Classic CV enhancement alone was NOT sufficient for the front view due to extreme water turbidity</p>
+</div>
+
+<!-- SLIDE 6: SAM Attempt -->
+<div class="slide" id="s5">
+  <h2>🤖 Method 2: SAM (Segment Anything Model)</h2>
+  <p style="margin-bottom:20px">Tried Meta's SAM & FastSAM as AI-powered alternatives to classic CV masking</p>
+  <div class="grid3">
+    <div class="card">
+      <div class="icon">🔍</div>
+      <h3>Classic CV (HSV)</h3>
+      <p style="text-align:left;font-size:.88em">Simple HSV thresholding within YOLO bbox. Fast but brittle — fails completely in murky water.</p>
+      <span class="badge badge-red">Poor for Front View</span>
+    </div>
+    <div class="card">
+      <div class="icon">⚡</div>
+      <h3>FastSAM</h3>
+      <p style="text-align:left;font-size:.88em">Lightweight SAM variant. Slightly better segmentation but inconsistent across frames.</p>
+      <span class="badge badge-yellow">Marginal Improvement</span>
+    </div>
+    <div class="card">
+      <div class="icon">🧠</div>
+      <h3>Full SAM (ViT-B)</h3>
+      <p style="text-align:left;font-size:.88em">Full SAM with bbox prompts. Did <b>slightly better</b> but still <span class="warn">not up to expectations</span>.</p>
+      <span class="badge badge-yellow">Better but Insufficient</span>
+    </div>
+  </div>
+  <p style="margin-top:20px"><span class="badge badge-red">Conclusion</span> SAM improved front-view masks slightly, but the extreme turbidity meant the fundamental issue persisted — <span class="warn">not production quality</span></p>
+</div>
+
+<!-- SLIDE 7: The Manual Annotation Decision -->
+<div class="slide" id="s6">
+  <h2>✍️ The Turning Point: Manual Annotation</h2>
+  <p style="margin-bottom:25px">Neither Classic CV nor SAM could reliably segment the front view → manual annotation required</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>Why Manual Annotation?</h3>
+      <ul>
+        <li>Front-view masks were too noisy for accurate Height</li>
+        <li>Automated methods worked on <span class="highlight">few frames only</span></li>
+        <li>Publication-quality data demands reliable measurements</li>
+        <li>Ground truth needed for training a detection model</li>
+        <li>MOT 1.1 format bounding box annotations created</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Annotation Scope</h3>
+      <ul>
+        <li><span class="highlight">15 fish × 2 views</span> (top + front)</li>
+        <li>Annotations for both top-view and front-view videos</li>
+        <li>Bounding boxes in MOT ground truth format</li>
+        <li>Frames organized by range directories</li>
+        <li>This became the foundation for the YOLO approach</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: YOLO Training -->
+<div class="slide" id="s7">
+  <h2>🚀 Method 3: YOLO Object Detection</h2>
+  <p style="margin-bottom:20px">Leveraging manual annotations to train a robust fish detector</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>Training Pipeline</h3>
+      <ul>
+        <li>MOT 1.1 annotations → converted to YOLO format</li>
+        <li>85/15 train/val split (frame-level, shuffled)</li>
+        <li>Trained <span class="highlight">YOLOv8m, YOLO11m, YOLO12m</span></li>
+        <li>Also trained <span class="highlight">YOLO11m-seg</span> (segmentation)</li>
+        <li>150 epochs, imgsz=640, AdamW optimizer</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Data Augmentation</h3>
+      <ul>
+        <li>HSV augmentation (h=0.015, s=0.7, v=0.4)</li>
+        <li>Rotation (±10°), Translation (10%), Scale (50%)</li>
+        <li>Horizontal & Vertical flips (50% each)</li>
+        <li>Mosaic (100%), MixUp (10%)</li>
+        <li>Cosine LR schedule, warmup=5 epochs</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:15px"><span class="badge badge-green">Key Advantage</span> YOLO provides reliable bounding boxes in BOTH views, enabling SAM-prompted segmentation within detected regions</p>
+</div>
+
+<!-- SLIDE 9: Regression Models -->
+<div class="slide" id="s8">
+  <h2>📈 Regression Models for Weight Prediction</h2>
+  <p style="margin-bottom:15px">Multiple regression models evaluated with Leave-One-Fish-Out (LOFO) cross-validation</p>
+  <table>
+    <tr><th>Model</th><th>Type</th><th>Key Config</th><th>Role</th></tr>
+    <tr><td><span class="highlight">Ridge Regression</span></td><td>Linear (L2)</td><td>α ∈ {0.1, 1, 10, 100}</td><td>Baseline linear</td></tr>
+    <tr><td><span class="highlight">Lasso Regression</span></td><td>Linear (L1)</td><td>α ∈ {1e-4 … 1.0}</td><td>Feature selection</td></tr>
+    <tr><td><span class="highlight">Elastic Net</span></td><td>Linear (L1+L2)</td><td>l1_ratio ∈ {0.1, 0.5, 0.9}</td><td>Combined regularization</td></tr>
+    <tr><td><span class="highlight">SVR (RBF kernel)</span></td><td>Kernel</td><td>C ∈ {1…1000}, γ tuned</td><td>Non-linear mapping</td></tr>
+    <tr><td><span class="highlight">K-Nearest Neighbors</span></td><td>Instance-based</td><td>k ∈ {3, 5, 7, 9}</td><td>Local estimation</td></tr>
+    <tr><td><span class="highlight">Random Forest</span></td><td>Ensemble (bagging)</td><td>n=200-800, depth tuned</td><td>🏆 Best performer</td></tr>
+    <tr><td><span class="highlight">Gradient Boosting</span></td><td>Ensemble (boosting)</td><td>Early stopping, subsample</td><td>Sequential refinement</td></tr>
+    <tr><td><span class="highlight">Extra Trees</span></td><td>Ensemble (random)</td><td>Bootstrap, sqrt features</td><td>Variance reduction</td></tr>
+    <tr><td><span class="highlight">Stacking Ensemble</span></td><td>Meta-learner</td><td>Ridge + SVR + RF → Ridge</td><td>Model combination</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 10: Final Model Results -->
+<div class="slide" id="s9">
+  <h2>🏆 Final Legitimate Model Results</h2>
+  <p style="margin-bottom:15px">Ensemble of Random Forest + Gradient Boosting on pure morphometric features</p>
+  <div class="grid2">
+    <div class="card" style="display:flex;align-items:center;justify-content:center">
+      <img src="final_legitimate_model_results.png" alt="Model Results" style="width:100%;border-radius:10px">
+    </div>
+    <div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px">
+        <div class="metric-box"><div class="val">91.4%</div><div class="label">R² Accuracy</div></div>
+        <div class="metric-box"><div class="val">1.203g</div><div class="label">MAE</div></div>
+        <div class="metric-box"><div class="val">0.914</div><div class="label">R² Score</div></div>
+        <div class="metric-box"><div class="val">15</div><div class="label">Fish Samples</div></div>
+      </div>
+      <div class="card">
+        <h3>Pure Morphometric Features Used</h3>
+        <ul>
+          <li>Length (cm), Width (cm), Height (cm)</li>
+          <li>Area (cm²), Perimeter (cm)</li>
+          <li>No data leakage, no contaminated features</li>
+          <li>RobustScaler preprocessing</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: Feature Correlations -->
+<div class="slide" id="s10">
+  <h2>🔗 Feature Correlation Analysis</h2>
+  <div class="grid2">
+    <div class="card"><img src="legitimate_feature_correlations.png" alt="Correlations" style="width:100%;border-radius:10px"></div>
+    <div class="card">
+      <h3>Key Observations</h3>
+      <ul>
+        <li><span class="highlight">Width ↔ Weight: 0.52</span> — strongest single predictor</li>
+        <li><span class="highlight">Area ↔ Weight: 0.26</span> — moderate correlation</li>
+        <li><span class="warn">Length ↔ Weight: -0.26</span> — surprisingly negative</li>
+        <li><span class="warn">Height ↔ Weight: -0.14</span> — weak, due to noisy front-view masks</li>
+        <li>Area ↔ Width: 0.89 — high collinearity</li>
+        <li>Perimeter ↔ Length: 0.86 — high collinearity</li>
+      </ul>
+      <h3 style="margin-top:15px">Implication</h3>
+      <p style="text-align:left;font-size:.9em">The weak Height correlation directly reflects the front-view masking challenges — motivating the YOLO + SAM approach for better segmentation.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12: Summary & Transition -->
+<div class="slide" id="s11">
+  <h2>🔄 Journey Summary & Next Steps</h2>
+  <div style="display:flex;gap:15px;align-items:stretch;max-width:1100px;width:100%">
+    <div class="card" style="flex:1;border-top:3px solid var(--danger);text-align:center">
+      <div class="icon">🔧</div>
+      <h3>Classic CV</h3>
+      <p style="font-size:.85em">Enhancement techniques applied. Good for top view, <span class="warn">failed for front view</span> due to murky water.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="card" style="flex:1;border-top:3px solid var(--warn);text-align:center">
+      <div class="icon">🧠</div>
+      <h3>SAM / FastSAM</h3>
+      <p style="font-size:.85em">Slightly better segmentation, but <span class="warn">not up to expectations</span>. Still struggled with turbidity.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="card" style="flex:1;border-top:3px solid var(--accent);text-align:center">
+      <div class="icon">✍️</div>
+      <h3>Manual Annotation</h3>
+      <p style="font-size:.85em">Created MOT 1.1 bounding box annotations as ground truth for training.</p>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="card" style="flex:1;border-top:3px solid var(--success);text-align:center">
+      <div class="icon">🚀</div>
+      <h3>YOLO Detection</h3>
+      <p style="font-size:.85em">Trained YOLOv8m/11m/12m. <span class="highlight">Reliable detection in both views.</span> Current approach.</p>
+    </div>
+  </div>
+  <div style="margin-top:30px;text-align:center">
+    <p style="font-size:1.1em;color:var(--text)">Current Best Result: <span class="highlight">R² = 0.914 | MAE = 1.203g | Accuracy = 91.4%</span></p>
+    <p style="margin-top:8px;font-size:.9em">Using Random Forest + Gradient Boosting ensemble on 5 pure morphometric features</p>
+  </div>
+</div>
+
+<div class="nav">
+  <button onclick="go(-1)">◀ Previous</button>
+  <button onclick="go(1)">Next ▶</button>
+</div>
+
+<script>
+let cur=0;const slides=document.querySelectorAll('.slide'),total=slides.length;
+function show(n){slides.forEach((s,i)=>{s.classList.toggle('active',i===n);});
+document.getElementById('slideNum').textContent=`${n+1} / ${total}`;
+document.getElementById('progress').style.width=((n+1)/total*100)+'%';}
+function go(d){cur=Math.max(0,Math.min(total-1,cur+d));show(cur);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(1);if(e.key==='ArrowLeft')go(-1);});
+show(0);
+</script>
+</body>
+</html>

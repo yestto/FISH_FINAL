@@ -1,0 +1,2 @@
+FishID,FrameIndex,cm_ground_per_px,cm_vertical_per_px,Length (cm),Width (cm),Height (cm),Area (cm²),Perimeter (cm),TopMaskPixels,FrontMaskPixels,BlurTop,BlurFront,Score
+fish8,6023,0.19473541261232866,0.13333333333333333,7.594681091880817,3.3105020144095874,2.0,20.193401592718995,19.007532058627916,549,372,448.8225119627211,266.6265038349998,726.4290157977209

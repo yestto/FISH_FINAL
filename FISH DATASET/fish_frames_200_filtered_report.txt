@@ -1,0 +1,27 @@
+Source: fish_frames_200.csv
+Rows: 3000 | Unique fish: 15
+Composite rel-error quantile: 0.95 | threshold: 0.176841
+Kept rows: 2857 | Outliers removed: 143
+
+Overall median relative errors BEFORE:
+  relL_med: 0.018835
+  relW_med: 0.016055
+  relA_med: 0.022929
+  relP_med: 0.004729
+  comp_med: 0.021403
+  comp_p95: 0.176841
+  comp_max: 1.101291
+
+Overall median relative errors AFTER:
+  relL_med: 0.017574
+  relW_med: 0.012195
+  relA_med: 0.018131
+  relP_med: 0.004729
+  comp_med: 0.021403
+  comp_p95: 0.176841
+  comp_max: 0.176841
+
+SelectionMode counts (kept):
+  repeat: 1522
+  within: 1233
+  fill: 102

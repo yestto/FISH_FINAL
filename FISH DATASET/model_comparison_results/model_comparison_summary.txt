@@ -1,0 +1,20 @@
+FISH DETECTION MODEL COMPARISON
+==================================================
+
+Total unseen frames tested: 204
+Frames source: C:\Users\shain\Downloads\FISH DATASET\frames\fraes
+
+YOLO11m:
+  Detection Rate: 100.0%
+  Avg Confidence: 0.7974
+
+YOLO12m:
+  Detection Rate: 100.0%
+  Avg Confidence: 0.8151
+
+YOLOv8m:
+  Detection Rate: 100.0%
+  Avg Confidence: 0.8010
+
+
+Best Model: YOLO12m

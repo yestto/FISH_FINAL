@@ -1,0 +1,29 @@
+﻿
+================================================================================
+  CONTROLLED A/B TEST RESULTS: ENHANCED vs RAW
+================================================================================
+  Tested exactly 1504 matching frames back-to-back.
+
+  Fish          N   CV_L_raw  CV_L_enh   CV_W_raw  CV_W_enh   CV_H_raw  CV_H_enh
+  -------------------------------------------------------------------------------------
+python : Traceback (most recent call last):
+At line:1 char:1
++ python _view_final_stats.py 2>&1 | Out-File -FilePath 
+result.txt -Enc ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most rec 
+   ent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\shain\Downloads\FISH DATASET\FISH 
+DATASET\_view_final_stats.py", line 26, in <module>
+    print(row_str)
+    ~~~~~^^^^^^^^^
+  File "C:\Users\shain\Miniconda3\Lib\encodings\cp1252.py", line 
+19, in encode
+    return 
+codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           
+~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character 
+'\u2191' in position 37: character maps to <undefined>

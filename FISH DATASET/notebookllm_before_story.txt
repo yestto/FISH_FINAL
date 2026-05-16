@@ -1,0 +1,79 @@
+# Fish Weight Prediction — BEFORE Story: Classic CV Approach
+## The First Method We Tried (Before YOLO Training)
+
+---
+
+## Phase 1: Classic Computer Vision Pipeline
+Before training any deep learning model, we first attempted to build a fully automated fish measurement pipeline using traditional Classic Computer Vision techniques.
+
+The pipeline worked as follows:
+1. **Background Subtraction:** Captured a clean background frame (empty tank), then subtracted it from each video frame to isolate the moving fish.
+2. **Absolute Difference & Grayscale Conversion:** Computed the pixel-wise absolute difference between the current frame and the background, then converted the result to grayscale.
+3. **Binary Thresholding:** Applied a fixed threshold to separate the foreground (fish) from the background (water).
+4. **Exclude Mask:** Applied a static exclusion mask to remove tank edges, pipes, and calibration markers that would contaminate the fish silhouette.
+5. **Morphological Operations:** Applied a series of Open → Close → Erode → Dilate steps to clean up the binary mask and fill internal holes.
+6. **Component Filtering:** Selected the largest connected component as the final fish mask.
+
+---
+
+## Phase 2: Image Enhancement Techniques Applied
+Because the raw underwater footage suffered from severe turbidity (murky water), low contrast, and uneven illumination, we applied 6 proven image enhancement techniques to try and rescue the frames:
+
+1. **Auto Gamma Correction** — Normalized overexposed and underexposed frames to a consistent brightness baseline.
+2. **CLAHE (Contrast Limited Adaptive Histogram Equalization)** — Improved local contrast in unevenly lit underwater scenes without blowing out highlights. Based on Zuiderveld (1994).
+3. **Non-Local Means Denoising** — Smoothed luminance noise while preserving color edges. Based on Buades et al. (2005).
+4. **Bilateral Filter** — Smoothed flat regions (water background) while keeping the sharp fish outline perfectly intact. Based on Tomasi & Manduchi (1998).
+5. **Multi-Scale Retinex** — Removed underwater haze/turbidity by estimating the illumination at multiple scales. Based on Jobson et al. (1997).
+6. **Unsharp Mask** — Aggressively sharpened edges in fog-like conditions where the fish outline was nearly invisible.
+
+Additionally, we designed a **Visibility Quality Score** (0–100) combining contrast, sharpness, and entropy metrics to automatically flag severely degraded frames.
+
+---
+
+## Phase 3: Results of Classic CV — What Went Wrong
+
+### Top View Camera:
+The Classic CV pipeline performed reasonably well for the **Top View** camera. Background subtraction worked because the fish was clearly visible against the clean blue tank floor. For many frames, the morphological pipeline produced usable masks. The stage-by-stage transition shows clean separation at each step: Raw → Background → AbsDiff → Threshold → Open → Close → Erode → Dilate → Final Mask.
+
+### Front View Camera — Critical Failure:
+The **Front View** camera was a disaster. The water was extremely murky and turbid. The background subtraction step produced extremely noisy, fragmented masks. Even after applying all 6 enhancement techniques, the front view masks were unusable for the vast majority of frames. The fish was barely visible against the murky water, leading to:
+- Broken, fragmented masks that captured water noise instead of the fish body
+- Masks that included the tank glass edge, pipes, and reflections
+- Complete mask failures where the fish was simply invisible
+
+As seen in the Front View Stage-by-Stage Transition figure, the pipeline shows nearly empty or badly fragmented masks at the Threshold, Open, and Close stages. The Final Mask is extremely poor quality compared to the Top View. This meant the front view required manual annotation for most frames, which is not scalable.
+
+---
+
+## Phase 4: Attempted Improvement with SAM (Without YOLO)
+We then tried using Meta's **Segment Anything Model (SAM)** directly, without a YOLO detection model providing bounding boxes. SAM showed slight improvement — it could sometimes capture a rough outline of the fish even in murky conditions. However, without a trained YOLO bounding box to guide it, SAM struggled with:
+- Not knowing *where* the fish was in the frame
+- Accidentally segmenting tank equipment, bubbles, and water reflections
+- Producing inconsistent mask sizes across frames
+
+SAM was doing "a little better" than Classic CV, but it was still not up to our expectations for production-quality measurements.
+
+---
+
+## Phase 5: Weight Estimation Using Classic CV Measurements
+Despite the masking challenges, we trained regression models on the measurements we could extract from the frames that worked. We used the following features: **Length (cm)**, **Width (cm)**, **Height (cm)**, **Area (cm²)**, **Perimeter (cm)**, plus derived features including **Volume (cm³)**, **Surface Area (cm²)**, **Aspect Ratio**, **Elongation**, **Compactness**, **Rectangularity**, and **Equivalent Diameter (cm)**.
+
+We tested and compared **four different regression models** using **Leave-One-Fish-Out Cross Validation** (train on 14 fish, predict the held-out fish, repeat for all 15):
+
+1. **Linear Regression** — The simplest baseline model. Fits a straight line through the data.
+2. **Ridge Regression** — Linear Regression with L2 regularization (alpha=1.0) to prevent overfitting on correlated features like Length and Width.
+3. **Random Forest Regressor** — An ensemble of 200 decision trees (max_depth=8) to capture non-linear relationships between fish dimensions and weight.
+4. **Gradient Boosting Regressor** — A sequential ensemble of 200 trees (max_depth=4, learning_rate=0.05) that iteratively corrects prediction errors.
+
+### Results of the Classic CV + Regression Pipeline:
+The best model achieved:
+- **MAE (Mean Absolute Error): 1.203 g**
+- **R² Score: 0.914**
+- **Accuracy: 91.4%**
+
+While these numbers look promising on paper, the model was trained *only* on the frames where the Classic CV masks happened to work well. For any new, unseen frames — especially from the front view — the system would completely break because it could not extract reliable measurements from the murky footage. This is why we needed to move to the YOLO-based detection approach.
+
+---
+
+## Conclusion of the Before Story
+The Classic CV approach proved that weight prediction from fish dimensions *is possible* (R² = 0.914), but the pipeline was fundamentally limited by its inability to produce reliable masks in murky, low-visibility underwater conditions. The front view camera was essentially unusable. This critical limitation motivated us to train a dedicated YOLO object detection model, which would give us intelligent, learned fish detection that works regardless of water quality — leading to the YOLO + Full SAM pipeline we built next.

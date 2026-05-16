@@ -1,0 +1,9 @@
+=== PUBLICATION-READY DATASET VALIDATION RESULTS ===
+Dataset: fish_measurements_publication_ready.csv
+Samples: 15
+Unique fish: 15
+Manual LOOCV R²: 0.011
+RMSE: 22.49 g
+MAE: 18.65 g
+Baseline MAE (predict mean): 17.70 g
+Note: Per-fold R² is not meaningful for LOOCV with 1-sample test folds.

@@ -1,0 +1,18 @@
+LEGITIMATE FISH WEIGHT PREDICTION RESULTS
+==================================================
+Dataset: 674 samples
+Features used: 7
+Features: ['Length (cm)', 'Width (cm)', 'Height (cm)', 'Area (cm²)', 'Perimeter (cm)', 'TopMaskPixels', 'FrontMaskPixels']
+Accuracy: 99.62%
+MAE: 0.070g
+R²: 1.000
+MAPE: 0.38%
+
+FEATURE IMPORTANCE:
+1. TopMaskPixels: 0.827
+2. Width (cm): 0.125
+3. Area (cm²): 0.018
+4. Perimeter (cm): 0.012
+5. Length (cm): 0.008
+6. Height (cm): 0.006
+7. FrontMaskPixels: 0.005

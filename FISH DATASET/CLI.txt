@@ -1,0 +1,83 @@
+base) PS C:\Users\shain\Downloads\llm-pipeline> npx tuningengines-cli jobs 2>&1
+npx : Usage: te jobs [options] [command]
+At line:1 char:1
++ npx tuningengines-cli jobs 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Usage: te jobs [options] [command]:String) [], RemoteEx  
+   ception
+    + FullyQualifiedErrorId : NativeCommandError
+
+Manage training jobs
+Options:
+  -h, --help             display help for command
+Commands:
+  list [options]         List training jobs
+  show [options] <id>    Show job details
+  create [options]       Submit a new training job
+  cancel [options] <id>  Cancel a running job
+  status [options] <id>  Get live job status
+  retry [options] <id>   Retry a failed job from checkpoint
+  estimate [options]     Get a cost estimate for a training job
+  help [command]         display help for command
+(base) PS C:\Users\shain\Downloads\llm-pipeline> cd 'c:\Users\shain\Downloads\llm-pipeline'
+(base) PS C:\Users\shain\Downloads\llm-pipeline> npx tuningengines-cli models 2>&1
+npx : Usage: te models [options] [command]
+At line:1 char:1
++ npx tuningengines-cli models 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Usage: te models [options] [command]:String) [], Remote  
+   Exception
+    + FullyQualifiedErrorId : NativeCommandError
+
+Manage your trained models
+Options:
+  -h, --help             display help for command
+Commands:
+  list [options]         List your trained and imported models
+  show [options] <id>    Show model details
+  delete <id>            Delete a model
+  status [options] <id>  Check import/export progress
+  import [options]       Import a model from S3
+  export [options] <id>  Export a model to S3
+  base [options]         List supported base models for fine-tuning
+  help [command]         display help for command
+(base) PS C:\Users\shain\Downloads\llm-pipeline> cd 'c:\Users\shain\Downloads\llm-pipeline'
+(base) PS C:\Users\shain\Downloads\llm-pipeline> npx tuningengines-cli jobs estimate --help
+Usage: te jobs estimate [options]
+
+Get a cost estimate for a training job
+
+Options:
+  --base-model <model>  Base model HuggingFace ID
+  --epochs <n>          Number of epochs (default: "3")
+  --max-examples <n>    Maximum examples
+  --repo-size-mb <mb>   Repository size in MB
+  --json                Output as JSON
+  -h, --help            display help for command
+(base) PS C:\Users\shain\Downloads\llm-pipeline> cd 'c:\Users\shain\Downloads\llm-pipeline'
+(base) PS C:\Users\shain\Downloads\llm-pipeline> npx tuningengines-cli jobs estimate --base-model Qwen/Qwen2.5-Coder-3B-Instruct --epochs 3 --json
+{
+  "estimate": {
+    "estimated_gpu_minutes": 18,
+    "estimated_cost_usd": 2.85,
+    "estimated_billed_minutes": 57,
+    "estimated_time_display": "18m",
+    "model_size_b": 3,
+    "gpu_type": "a100",
+    "gpu_count": 2,
+    "num_examples": 500,
+    "examples_source": "default",
+    "epochs": 3,
+    "recommended_epochs": 4,
+    "user_requested_epochs": 3,
+    "mins_per_epoch": 0.7,
+    "overhead_mins": 16.1,
+    "repo_size_mb": null
+  },
+  "balance": {
+    "current_cents": 815,
+    "required_cents": 385,
+    "sufficient": true
+  }
+}
+(base) PS C:\Users\shain\Downloads\llm-pipeline> 

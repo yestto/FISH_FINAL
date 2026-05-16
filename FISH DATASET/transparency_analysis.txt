@@ -1,0 +1,16 @@
+TRANSPARENCY ANALYSIS REPORT
+==================================================
+Dataset: 750 samples
+Features used: 24
+Accuracy: 99.98%
+MAE: 0.010g
+Near-perfect predictions: 141/150
+Prediction std: 23.392g
+Actual std: 23.397g
+
+TOP FEATURES:
+1. _PerFishScale_Perimeter: 0.943
+2. _PerFishScale: 0.033
+3. _Truth_Length (cm): 0.009
+4. _PerFishScale_Area: 0.004
+5. _PerFishScale_Width: 0.003
